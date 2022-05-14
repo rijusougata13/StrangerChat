@@ -1,12 +1,20 @@
 const express=require('express');
 const app=express();
+const http = require('http');
 const port=process.env.PORT || 5000;
 const bodyParser=require('body-parser');
 const cors=require('cors');
 const uuid=require('uuid-random');
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+    cors({
+      origin: ['https://americanairlines.com'],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
+    })
+  );
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -20,19 +28,26 @@ app.get('/',(req,res)=>{
 }
 );
 
-const server=app.listen(port,()=>{
-    const host=server.address().address;
-    const port=server.address().port;
-    console.log(`Server is running on port ${port}`);
-});
+// const server=app.listen(port);
 
-const io=require('socket.io')(server);
+const server1=http.createServer(app);
+
+const httpServer = require("http").createServer();
+const io = require("socket.io")(httpServer, {
+    cors: {
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST"]
+    }
+  });
+
+httpServer.listen(5000);
 
 var chatRoomData=[];
 var connectedClients={};
 
 io.on('connection',(socket)=>{
     console.log('User connected');
+    sendUpdatedChatRoomData(socket);  
     socket.on('disconnect',()=>{
         console.log('User disconnected');
     }
@@ -40,7 +55,7 @@ io.on('connection',(socket)=>{
 
 
     socket.on("SendMessage",(data)=>{
-        console.log(data);
+        console.log("data",data);
         chatRoomData.push(data);
         sendUpdatedChatRoomData(socket);
     }
@@ -58,7 +73,7 @@ io.on('connection',(socket)=>{
     socket.on("CreateUserData",()=>{
         console.log("User created");
         let userId=uuid();
-        let username="ridju";
+        let username="user"+(Math.floor(Math.random() * 1000)).toString();
         let userData={userId,username};
         socket.emit("setUserData",userData);
     })

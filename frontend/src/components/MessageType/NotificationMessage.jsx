@@ -35,12 +35,13 @@ const useStyles = makeStyles({
     }
   });
   
-  export default function NotificationMessage() {
+  export default function NotificationMessage(props) {
     const classes = useStyles();
+    const {message}=props;
     return (
       <Box className={classes.currentUserTextContainer}>
             <Box className={classes.textBubble}>
-                Lorem ipsum dolor situgiat?
+               {message}
             </Box>
       </Box>
     );

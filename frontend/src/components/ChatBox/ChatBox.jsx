@@ -7,6 +7,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import { TextField } from '@material-ui/core';
 
+import {socket} from '../../utils/socket';
 import MyMessage from '../MessageType/MyMessage';
 import Typography from '@material-ui/core/Typography';
 import NotificationMessage from '../MessageType/NotificationMessage';
@@ -43,11 +44,50 @@ const useStyles = makeStyles({
 
 export default function ChatBox(props) {
   const classes = useStyles();
+  const [initialLoad,setInitialLoad]=React.useState(true);
+  const messageEndRef=React.useRef(null);
+  const autoScrollOffset = 100;
+
+  
   const {chatRoomData,currentUsername}=props;
+
+  React.useEffect(()=>{
+    if(messageEndRef.current){
+      scrollToBottom();
+    }
+  },[messageEndRef.current,chatRoomData]);
+
+  const sendMessage=()=>{
+    
+    let message=document.getElementById('message').value;
+    socket.emit('SendMessage',{message,username:currentUsername});
+    document.getElementById('message').value='';
+    shouldScrollToBottom();
+  };
+
+  const shouldScrollToBottom=()=>{
+    //If user is near the bottom of the chat, automatically navigate them to bottom when new chat message/notification appears
+		if (messageEndRef.current.scrollHeight - messageEndRef.current.scrollTop < messageEndRef.current.offsetHeight + autoScrollOffset){
+			scrollToBottom()
+		}
+
+		//Navigate to end of chat when entering chat the first time
+		if(initialLoad){
+			scrollToBottom()
+      setInitialLoad(false);
+		}
+	}
+
+	const scrollToBottom=()=>{
+		//Scrolls user to end of chat message window
+    setTimeout(()=>{
+		messageEndRef.current.scrollTop = messageEndRef.current.scrollHeight;
+    },100);
+	}
 
   return (
     <Card className={classes.root}>
-      <Box className={classes.chatSection}>
+      <Box className={classes.chatSection} ref={messageEndRef}>
       	{chatRoomData.map( (messageData, index) => {
 
 						if(messageData.username == currentUsername) {
@@ -60,8 +100,8 @@ export default function ChatBox(props) {
             })}
       </Box>
       <CardActions>
-      <TextField id="standard-basic" label="Send Message"  className={classes.textField}/>
-      <Button variant="contained" color="primary" className={classes.button} href="#contained-buttons">
+      <TextField id="message" label="Send Message"  className={classes.textField}/>
+      <Button variant="contained" color="primary" className={classes.button}  onClick={sendMessage}>
         Send
       </Button>
       </CardActions>

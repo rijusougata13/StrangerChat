@@ -42,16 +42,17 @@ const useStyles = makeStyles({
     }
   });
   
-  export default function OtherMessage() {
+  export default function OtherMessage(props) {
     const classes = useStyles();
+    const {username,message}=props;
     return (
       <Box className={classes.currentUserTextContainer}>
             <Box className={classes.wrapper}>
           <Box className={classes.usernameText}>
-            UserName
+            {username}
           </Box>
 					<Box className={classes.textBubble}>
-						Lorem ipsum dolor situgiat?
+						{message}
 					</Box>
             </Box>
       </Box>

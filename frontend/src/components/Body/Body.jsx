@@ -45,7 +45,6 @@ const useStyles = makeStyles({
     React.useEffect(()=>{
       let ignore=false;
       if(!ignore){
-      console.log("useEffect");
       let userIdVal=localStorage.getItem('userId');
       let userNameVal=localStorage.getItem('userName');
       if(!userIdVal){
@@ -59,12 +58,7 @@ const useStyles = makeStyles({
           }
           socket.emit('userEnteredRoom',userData);
         });
-        socket.on("RetrieveChatRoomData", (chatRoomData) => {
-          if(!ignore){
-          setChatRoomdata(chatRoomData);
-          }
-        })
-        console.log("If");
+        
       }
       else {
         //If user already has userid and username, notify server to allow them to join chat
@@ -73,13 +67,9 @@ const useStyles = makeStyles({
         setUserId(userIdVal);
         }
         socket.emit("UserEnteredRoom", {userID: userIdVal, username: userNameVal})
-        socket.on("RetrieveChatRoomData", (chatRoomData) => {
-          if(!ignore){
-          setChatRoomdata(chatRoomData);
-          }
-        })
-        console.log("else");
+      
     }
+   
   }
      //Retrieve game data (from Get Chat data socket call)
      return ()=>{
@@ -87,9 +77,12 @@ const useStyles = makeStyles({
      }
     },[]);
    
-    useEffect(()=>{
-      console.log("Hi");
+    React.useEffect(()=>{
+      socket.on("RetrieveChatRoomData", (chatRoomData) => {
+        setChatRoomdata(chatRoomData);
+      });
     },[])
+   
 
     return (
       <Box className={classes.root}>
@@ -101,6 +94,7 @@ const useStyles = makeStyles({
               {userName}
             </Typography>
           </Box>
+          {console.log(chatRoomdata)}
             <ChatBox chatRoomData={chatRoomdata} currentUsername={userName}/>     
       </Box>
     );
