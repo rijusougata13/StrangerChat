@@ -30,8 +30,6 @@ app.get('/',(req,res)=>{
 
 // const server=app.listen(port);
 
-const server1=http.createServer(app);
-
 const httpServer = require("http").createServer();
 const io = require("socket.io")(httpServer, {
     cors: {
@@ -42,6 +40,7 @@ const io = require("socket.io")(httpServer, {
 
 httpServer.listen(5000);
 
+var chatRoom=[{}];
 var chatRoomData=[];
 var connectedClients={};
 
@@ -53,6 +52,31 @@ io.on('connection',(socket)=>{
     }
     );
 
+    socket.on("createRoom",(data)=>{
+        var roomId=uuid();
+        var room={
+            id:roomId,
+            name:"",
+            users:[data],
+            messages:[],          
+          }
+        
+        chatRoom.push(room);
+        socket.join(roomId);
+        socket.emit("userEnteredRoom",)
+    });
+
+    socket.on("joinRoom",data=>{
+        var roomId=data.roomId;
+        var room=chatRoom.find(room=>room.id===roomId);
+        if(room){
+            room.users.push(data);
+            socket.join(roomId);
+            socket.emit("RetrieveChatRoomData", chatRoomData);
+            socket.broadcast.emit("RetrieveChatRoomData", chatRoomData);
+        }
+     }); 
+    
 
     socket.on("SendMessage",(data)=>{
         console.log("data",data);
