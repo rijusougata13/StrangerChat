@@ -40,59 +40,126 @@ const io = require("socket.io")(httpServer, {
 
 httpServer.listen(5000);
 
-var chatRoom=[{}];
+var chatRoom=[];
 var chatRoomData=[];
-var connectedClients={};
 
 io.on('connection',(socket)=>{
+  var currentRoomId;
+  var currentUserData;
     console.log('User connected');
+
     sendUpdatedChatRoomData(socket);  
     socket.on('disconnect',()=>{
         console.log('User disconnected');
+      
     }
     );
 
-    socket.on("createRoom",(data)=>{
+    socket.on("createRoom",async(data)=>{
         var roomId=uuid();
+        currentRoomId=roomId;
         var room={
             id:roomId,
             name:"",
-            users:[data],
+            users:[data.user],
             messages:[],          
           }
         
         chatRoom.push(room);
         socket.join(roomId);
-        socket.emit("userEnteredRoom",)
-    });
+        const sendData={
+            roomId:roomId,
+            user:data.user,
+        }
+        currentUserData=data.user;
+        const userData=data.user;
+        var enteredRoomMessage = {message: `${userData.userName} has entered the chat`, userName: "", userID: 0, timeStamp: null}
+        
+        var room=undefined;
+        for (let i = 0; i < chatRoom.length; i++) {
+          if (chatRoom[i].id == roomId) {
+              room=chatRoom[i];
+            break;
+          }
+        }
+        socket.emit("setRoomId",roomId);
+        if(room){
+            room.messages.push(enteredRoomMessage);
+            socket.emit("RetrieveChatRoomData", room.messages);
+          }
+
+
+      });
 
     socket.on("joinRoom",data=>{
-        var roomId=data.roomId;
-        var room=chatRoom.find(room=>room.id===roomId);
+        var room=undefined;
+        for (let i = 0; i < chatRoom.length; i++) {
+          if (chatRoom[i].users.length < 2) {
+            chatRoom[i].users.push(data.user);
+            room=chatRoom[i];
+            break;
+          }
+        }
         if(room){
-            room.users.push(data);
+            const roomId=room.id;
+          socket.emit("setRoomId",roomId);
+        console.log("connected",room);
+
+            currentRoomId=roomId;
+            currentUserData=data.user;
             socket.join(roomId);
-            socket.emit("RetrieveChatRoomData", chatRoomData);
-            socket.broadcast.emit("RetrieveChatRoomData", chatRoomData);
+            
+          var enteredRoomMessage = {message: `${data.user.userName} has entered the chat`, userName: "", userID: 0, timeStamp: null}
+          room.messages.push(enteredRoomMessage);
+          socket.emit("RetrieveChatRoomData", room.messages);
+          socket.broadcast.emit("RetrieveChatRoomData", room.messages);
+        }
+        else{
+          socket.emit('noRoomFound');
         }
      }); 
     
 
     socket.on("SendMessage",(data)=>{
-        console.log("data",data);
-        chatRoomData.push(data);
-        sendUpdatedChatRoomData(socket);
-    }
-    );
+        var roomId=data.roomId;
+        var room=undefined;
+        for (let i = 0; i < chatRoom.length; i++) {
+          if (chatRoom[i].id===roomId) {
+            room=chatRoom[i];
+            break;
+          }
+        }
+        if(room){
+            var roomMessage = {message: data.message, userName: data.userName, userID: 0, timeStamp: null}
+            room.messages.push(roomMessage);
+            console.log("room",room);
+            socket.emit("RetrieveChatRoomData", room.messages);
+            socket.broadcast.emit("RetrieveChatRoomData", room.messages);
+        }
+      });
 
-    socket.on("userEnteredRoom",(userData)=>{
-        console.log(userData);
-        var enteredRoomMessage = {message: `${userData.username} has entered the chat`, username: "", userID: 0, timeStamp: null}
-        console.log(enteredRoomMessage);
-        chatRoomData.push(enteredRoomMessage);
-        sendUpdatedChatRoomData(socket);
+    socket.on("userEnteredRoom",(data)=>{
+        const userData=data.user;
+        var enteredRoomMessage = {message: `${userData.userName} has entered the chat`, userName: "", userID: 0, timeStamp: null}
+        
+        var room=undefined;
+        for (let i = 0; i < chatRoom.length; i++) {
+          if (chatRoom[i].id===roomId) {
+            room=chatRoom[i];
+            break;
+          }
+        }
 
-    })
+        if(room){
+            room.messages.push(data.message);
+            socket.to(roomId).emit("RetrieveChatRoomData", room.messages);
+            sendUpdatedChatRoomData(socket,roomId);
+
+          }
+        
+
+
+    });
 
     socket.on("CreateUserData",()=>{
         console.log("User created");
@@ -104,27 +171,37 @@ io.on('connection',(socket)=>{
 
     socket.on('disconnecting', (data) => {
         console.log("Client disconnecting...");
-    
-        if(connectedClients[socket.id]){
-          var leftRoomMessage = {message: `${connectedClients[socket.id].username} has left the chat`, username: "", userID: 0, timeStamp: null}
-          chatRoomData.push(leftRoomMessage)
-          sendUpdatedChatRoomData(socket)
-          delete connectedClients[socket.id]
-        }
+        if(currentUserData){
+          var leaveRoomMessage = {message: `${currentUserData.userName} has left the chat`, userName: "", userID: 0, timeStamp: null}
+          
+          var room=undefined;
+          for (let i = 0; i < chatRoom.length; i++) {
+            if (chatRoom[i].id===currentRoomId) {
+              room=chatRoom[i];
+              break;
+            }
+          }
+          
+          if(room){
+              room.users.splice(room.users.indexOf(currentUserData),1);
+              if(room.users.length===0){
+                  chatRoom.splice(chatRoom.indexOf(room),1);
+              }
+              console.log("room",chatRoom);
+              room.messages.push(leaveRoomMessage);
+              socket.broadcast.emit("RetrieveChatRoomData", room.messages);
+              
+            }
+          }
     
       });
     
       socket.on('ClearChat', () => {
         chatRoomData=[]
-        console.log(chatRoomData)
         sendUpdatedChatRoomData(socket);
 
       })
-    socket.on('chat',(data)=>{
-        console.log("hi")
-        io.emit('chat',data);
-    }
-    );
+   
     socket.on('typing',(data)=>{
         socket.broadcast.emit('typing',data);
     }
@@ -132,9 +209,9 @@ io.on('connection',(socket)=>{
 }
 );
 
-function sendUpdatedChatRoomData(client){
-    client.emit("RetrieveChatRoomData", chatRoomData)
-    client.broadcast.emit("RetrieveChatRoomData", chatRoomData)
+function sendUpdatedChatRoomData(client,roomId,message){
+    client.to(roomId).emit("RetrieveChatRoomData", message)
+    // client.to(roomId).broadcast.emit("RetrieveChatRoomData", message)
   }
 
 

@@ -3,9 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import ChatBox from '../ChatBox/ChatBox';
 import Box from '@material-ui/core/Box';
-import {Typography} from '@material-ui/core';
+import {Button, Typography} from '@material-ui/core';
 import { socket } from '../../utils/socket';
-
 
 const useStyles = makeStyles({
   
@@ -41,12 +40,14 @@ const useStyles = makeStyles({
     const [userName,setUserName]=React.useState('');
     const [userId,setUserId]=React.useState('');
     const [chatRoomdata,setChatRoomdata]=React.useState([]);
+    let roomId=localStorage.getItem('roomId');
 
     React.useEffect(()=>{
       let ignore=false;
       if(!ignore){
       let userIdVal=localStorage.getItem('userId');
       let userNameVal=localStorage.getItem('userName');
+
       if(!userIdVal){
         socket.emit('CreateUserData');
         socket.on('setUserData',userData=>{
@@ -56,9 +57,8 @@ const useStyles = makeStyles({
           setUserName(userData.username);
           setUserId(userData.userId); 
           }
-          socket.emit('userEnteredRoom',userData);
+          // socket.emit('userEnteredRoom',userData);
         });
-        
       }
       else {
         //If user already has userid and username, notify server to allow them to join chat
@@ -66,7 +66,7 @@ const useStyles = makeStyles({
         setUserName(userNameVal);
         setUserId(userIdVal);
         }
-        socket.emit("UserEnteredRoom", {userID: userIdVal, username: userNameVal})
+        // socket.emit("UserEnteredRoom", {userID: userIdVal, username: userNameVal})
       
     }
    
@@ -81,11 +81,24 @@ const useStyles = makeStyles({
       socket.on("RetrieveChatRoomData", (chatRoomData) => {
         setChatRoomdata(chatRoomData);
       });
+
+      socket.on("setRoomId",roomId=>{
+        localStorage.setItem('roomId',roomId);
+      });
+      socket.on("removeRoomId",roomId=>{
+        localStorage.removeItem('roomId');
+      });
+      
     },[])
    
 
     return (
       <Box className={classes.root}>
+        {/* <Box> 
+        <Button onClick={e=>socket.emit('createRoom',{user:{userName,userId}})}>Create Room</Button>
+        <Button onClick={e=>socket.emit('joinRoom',{user:{userName,userId}})}>Join Room</Button>
+        </Box> */}
+
          <Box className={classes.userDetails}>
             <Typography  variant="h5">
             CurrentUser: &nbsp;
@@ -94,7 +107,7 @@ const useStyles = makeStyles({
               {userName}
             </Typography>
           </Box>
-          {console.log(chatRoomdata)}
+          <Typography variant="h5" style={{color:'black',margin:'10px'}}>Room: {roomId}</Typography>
             <ChatBox chatRoomData={chatRoomdata} currentUsername={userName}/>     
       </Box>
     );

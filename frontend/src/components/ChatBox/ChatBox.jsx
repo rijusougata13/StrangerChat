@@ -30,7 +30,7 @@ const useStyles = makeStyles({
         margin: '0',
         border: '0',
         overflow: 'scroll',
-        Height: '70%',
+        height: '80%',
         background: '#f2f2f2'
     },
     textField:{
@@ -47,20 +47,20 @@ export default function ChatBox(props) {
   const [initialLoad,setInitialLoad]=React.useState(true);
   const messageEndRef=React.useRef(null);
   const autoScrollOffset = 100;
-
   
   const {chatRoomData,currentUsername}=props;
-
+  var roomId;
   React.useEffect(()=>{
     if(messageEndRef.current){
       scrollToBottom();
     }
+   roomId=localStorage.getItem('roomId');
+
   },[messageEndRef.current,chatRoomData]);
 
   const sendMessage=()=>{
-    
     let message=document.getElementById('message').value;
-    socket.emit('SendMessage',{message,username:currentUsername});
+    socket.emit('SendMessage',{message,userName:currentUsername,roomId});
     document.getElementById('message').value='';
     shouldScrollToBottom();
   };
@@ -89,18 +89,20 @@ export default function ChatBox(props) {
     <Card className={classes.root}>
       <Box className={classes.chatSection} ref={messageEndRef}>
       	{chatRoomData.map( (messageData, index) => {
-
-						if(messageData.username == currentUsername) {
-			    			return <MyMessage key={index} username={messageData.username} message={messageData.message}/>
-			    		} else if (messageData.username == '') {
-			    			return <NotificationMessage key={index} username={messageData.username} message={messageData.message}/>
+            console.log(messageData.userName,currentUsername);
+            if(messageData.userName == currentUsername) {
+			    			return <MyMessage key={index} username={messageData.userName} message={messageData.message}/>
+			    		} else if (messageData.userName == '') {
+			    			return <NotificationMessage key={index} username={messageData.userName} message={messageData.message}/>
 			    		} else {
-			    			return <OtherMessage key={index} username={messageData.username} message={messageData.message}/>
+			    			return <OtherMessage key={index} username={messageData.userName} message={messageData.message}/>
 			    		}
             })}
       </Box>
       <CardActions>
-      <TextField id="message" label="Send Message"  className={classes.textField}/>
+      <TextField id="message" label="Send Message"  className={classes.textField} 
+      // onKeyPress={e=>sendMessage}
+      />
       <Button variant="contained" color="primary" className={classes.button}  onClick={sendMessage}>
         Send
       </Button>
