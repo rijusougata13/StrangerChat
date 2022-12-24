@@ -38,7 +38,7 @@ const io = require("socket.io")(httpServer, {
     }
   });
 
-httpServer.listen(5000);
+httpServer.listen(5000, '0.0.0.0', () => console.log('Listening on port 5000'));
 
 var chatRoom=[];
 var chatRoomData=[];
