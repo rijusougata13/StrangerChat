@@ -5,8 +5,8 @@ A web app chat with random people. You can connect random people who is online a
  
 ## How to start
 - fork the repo and clone in your machine
-- go to backend directory and run ```yarn install`` and ```yarn start``` to start the backend service at localhost:5000
-- go to frontend directory and run ```yarn install`` and ```yarn start``` to start the frontend service at localhost:3000
+- go to backend directory and run ```yarn install``` and ```yarn start``` to start the backend service at localhost:5000
+- go to frontend directory and run ```yarn install``` and ```yarn start``` to start the frontend service at localhost:3000
 
 ## Tech stack
 - React as frontend library
