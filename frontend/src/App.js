@@ -4,6 +4,8 @@ import Header from './components/Header/Header';
 import Body from './components/Body/Body';
 import { Button,Box } from '@material-ui/core';
 import { socket } from './utils/socket';
+import ChatImg from './assets/chat.svg';
+import ChatImg2 from './assets/chat2.svg';
 
 
 const useStyles = makeStyles({
@@ -14,7 +16,25 @@ const useStyles = makeStyles({
     flexDirection:'column',
     justifyContent:'center',
     display: 'flex',
-},
+  },
+  backgroundImg1:{
+    width:'40%',
+    height:'40%',
+    position:'absolute',
+    zIndex:'-1',
+    opacity:'.2',
+    top:"10%",
+    left:"0%"
+  },
+  backgroundImg2: {
+    width: '40%',
+    height: '40%',
+    position: 'absolute',
+    zIndex: '-1',
+    opacity: '0.2',
+    bottom: "10%",
+    right: "0%"
+  },
 introText:{
   fontSize:'1.5rem',
   fontWeight:'bold',
@@ -75,6 +95,9 @@ function App() {
       <Header/>
          {!enableChat &&
           <Box className={classes.dashboard} >
+            <img src={ChatImg} className={classes.backgroundImg1} />
+          <img src={ChatImg2} className={classes.backgroundImg2} />
+
             <Box>
               <Typography className={classes.introText}>Stranger Chat is great way to meet new people while keeping your privacy safe!!</Typography>
             </Box>
