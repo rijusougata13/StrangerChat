@@ -38,10 +38,12 @@ const io = require("socket.io")(httpServer, {
     }
   });
 
-httpServer.listen(5000, '0.0.0.0', () => console.log('Listening on port 5000'));
+const PORT= process.env.PORT || 5000;
+
+httpServer.listen(PORT, '0.0.0.0', () => console.log('Listening on port 5000'));
 
 var chatRoom=[];
-var chatRoomData=[];
+var chatRoomData=[]; 
 
 io.on('connection',(socket)=>{
   var currentRoomId;
