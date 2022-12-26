@@ -15,5 +15,5 @@ A web app chat with random people. You can connect random people who is online a
 
 
 ## Gallery
-![Screenshot 2022-12-24 at 4 12 31 PM](https://user-images.githubusercontent.com/52108435/209432428-d206fc1e-104e-48e5-913c-66bfc744d6d7.png)
-![Screenshot 2022-12-24 at 4 12 59 PM](https://user-images.githubusercontent.com/52108435/209432432-515660a9-9feb-4b7c-b848-d40f6c25627c.png)
+![Screenshot 2022-12-27 at 12 13 30 AM](https://user-images.githubusercontent.com/52108435/209576033-a497aa30-b6b7-4bc6-9e1d-cc627f0b7ade.png)
+![Screenshot 2022-12-27 at 12 13 21 AM](https://user-images.githubusercontent.com/52108435/209576043-77664ebd-6c92-4e08-aa74-17fc3ce3f591.png)
