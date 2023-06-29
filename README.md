@@ -1,7 +1,7 @@
 # StrangerChat
 
 ## Description
-A web app chat with random people. You can connect random people who is online and looking to connect.
+A web app chat with random people. You can connect with random people who are online and looking to connect.
  
 ## How to start
 - fork the repo and clone in your machine
@@ -9,7 +9,7 @@ A web app chat with random people. You can connect random people who is online a
 - go to frontend directory and run ```yarn install``` and ```yarn start``` to start the frontend service at localhost:3000
 
 ## Tech stack
-- React as frontend library
+- React as a frontend library
 - Express for backend
 
 
